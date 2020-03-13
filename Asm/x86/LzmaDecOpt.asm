@@ -7,6 +7,7 @@
 ; and with another functions in LzmaDec.c file.
 ; CLzmaDec structure, (probs) array layout, input and output of
 ; LzmaDec_DecodeReal_*() must be equal in both versions (C / ASM).
+.intel_syntax noprefix
 
 ifndef x64
 ; x64=1

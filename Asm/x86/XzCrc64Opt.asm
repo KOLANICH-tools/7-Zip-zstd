@@ -1,5 +1,6 @@
 ; XzCrc64Opt.asm -- CRC64 calculation : optimized version
 ; 2011-06-28 : Igor Pavlov : Public domain
+.intel_syntax noprefix
 
 include 7zAsm.asm
 

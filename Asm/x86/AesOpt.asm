@@ -1,28 +1,31 @@
+/*
 ; AesOpt.asm -- Intel's AES.
 ; 2009-12-12 : Igor Pavlov : Public domain
+*/
+.intel_syntax noprefix
 
-include 7zAsm.asm
+.include "7zAsm.asm"
 
 MY_ASM_START
 
-ifndef x64
+.ifndef x64
     .xmm
-endif
+.endif
 
-ifdef x64
+.ifdef x64
     num     equ r8
-else
+.else
     num     equ [r4 + REG_SIZE * 4]
-endif
+.endif
 
 rD equ r2
 rN equ r0
 
-MY_PROLOG macro reg:req
-    ifdef x64
+.macro MY_PROLOG reg:req
+    .ifdef x64
     movdqa  [r4 + 8], xmm6
     movdqa  [r4 + 8 + 16], xmm7
-    endif
+    .endif
 
     push    r3
     push    r5
@@ -34,51 +37,51 @@ MY_PROLOG macro reg:req
 
     movdqa  reg, [r1]
     add     r1, 32
-endm
+.endm
 
-MY_EPILOG macro
+.macro MY_EPILOG
     pop     r6
     pop     r5
     pop     r3
 
-    ifdef x64
+    .ifdef x64
     movdqa  xmm6, [r4 + 8]
     movdqa  xmm7, [r4 + 8 + 16]
-    endif
+    .endif
 
     MY_ENDP
-endm
+.endm
 
 ways equ 4
 ways16 equ (ways * 16)
 
-OP_W macro op, op2
+.macro OP_W op, op2
     i = 0
     rept ways
     op @CatStr(xmm,%i), op2
     i = i + 1
-    endm
-endm
+    .endm
+.endm
 
-LOAD_OP macro op:req, offs:req
+.macro LOAD_OP op:req, offs:req
     op      xmm0, [r1 + r3 offs]
-endm
+.endm
   
-LOAD_OP_W macro op:req, offs:req
+.macro LOAD_OP_W op:req, offs:req
     movdqa  xmm7, [r1 + r3 offs]
     OP_W    op, xmm7
-endm
+.endm
 
 
 ; ---------- AES-CBC Decode ----------
 
-CBC_DEC_UPDATE macro reg, offs
+.macro CBC_DEC_UPDATE reg, offs
     pxor    reg, xmm6
     movdqa  xmm6, [rD + offs]
     movdqa  [rD + offs], reg
-endm
+.endm
 
-DECODE macro op:req
+.macro DECODE op:req
     op      aesdec, +16
   @@:
     op      aesdec, +0
@@ -86,7 +89,7 @@ DECODE macro op:req
     sub     x3, 32
     jnz     @B
     op      aesdeclast, +0
-endm
+.endm
 
 MY_PROC AesCbc_Decode_Intel, 3
     MY_PROLOG xmm6
@@ -130,7 +133,7 @@ MY_PROC AesCbc_Decode_Intel, 3
 
 ; ---------- AES-CBC Encode ----------
 
-ENCODE macro op:req
+.macro ENCODE op:req
     op      aesenc, -16
   @@:
     op      aesenc, +0
@@ -138,7 +141,7 @@ ENCODE macro op:req
     add     r3, 32
     jnz     @B
     op      aesenclast, +0
-endm
+.endm
 
 MY_PROC AesCbc_Encode_Intel, 3
     MY_PROLOG xmm0
@@ -167,13 +170,13 @@ MY_PROC AesCbc_Encode_Intel, 3
 
 ; ---------- AES-CTR ----------
 
-XOR_UPD_1 macro reg, offs
+.macro XOR_UPD_1 reg, offs
     pxor    reg, [rD + offs]
-endm
+.endm
 
-XOR_UPD_2 macro reg, offs
+.macro XOR_UPD_2 reg, offs
     movdqa  [rD + offs], reg
-endm
+.endm
 
 MY_PROC AesCtr_Code_Intel, 3
     MY_PROLOG xmm6
@@ -203,7 +206,7 @@ MY_PROC AesCtr_Code_Intel, 3
     paddq   xmm6, xmm7
     movdqa  @CatStr(xmm,%i), xmm6
     i = i + 1
-    endm
+    .endm
 
     mov     r3, r6
     LOAD_OP_W  pxor, -32

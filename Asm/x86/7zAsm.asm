@@ -1,47 +1,48 @@
-; 7zAsm.asm -- ASM macros
-; 2018-02-03 : Igor Pavlov : Public domain
+/*; 7zAsm.asm -- .macro ASMs
+; 2018-02-03 : Igor Pavlov : Public domain*/
+.intel_syntax noprefix
 
-MY_ASM_START macro
-  ifdef x64
+.macro MY_ASM_START
+  .ifdef x64
     .code
-  else
+  .else
     .386
     .model flat
     _TEXT$00 SEGMENT PARA PUBLIC 'CODE'
-  endif
-endm
+  .endif
+.endm
 
-MY_PROC macro name:req, numParams:req
+.macro MY_PROC name:req, numParams:req
   align 16
   proc_numParams = numParams
-  ifdef x64
+  .ifdef x64
     proc_name equ name
-  else
+  .else
     proc_name equ @CatStr(@,name,@, %numParams * 4)
-  endif
+  .endif
   proc_name PROC
-endm
+.endm
 
-MY_ENDP macro
-  ifdef x64
+.macro MY_ENDP
+  .ifdef x64
     ret
-  else
+  .else
     if proc_numParams LT 3
       ret
-    else
+    .else
       ret (proc_numParams - 2) * 4
-    endif
-  endif
+    .endif
+  .endif
   proc_name ENDP
-endm
+.endm
 
-ifdef x64
+.ifdef x64
   REG_SIZE equ 8
   REG_LOGAR_SIZE equ 3
-else
+.else
   REG_SIZE equ 4
   REG_LOGAR_SIZE equ 2
-endif
+.endif
 
   x0 equ EAX
   x1 equ ECX
@@ -71,7 +72,7 @@ endif
   x2_H equ DH
   x3_H equ BH
 
-ifdef x64
+.ifdef x64
   x5_L equ BPL
   x6_L equ SIL
   x7_L equ DIL
@@ -92,7 +93,7 @@ ifdef x64
   x13 equ r13d
   x14 equ r14d
   x15 equ r15d
-else
+.else
   r0 equ x0
   r1 equ x1
   r2 equ x2
@@ -101,24 +102,24 @@ else
   r5 equ x5
   r6 equ x6
   r7 equ x7
-endif
+.endif
 
-MY_PUSH_4_REGS macro
+.macro MY_PUSH_4_REGS
     push    r3
     push    r5
     push    r6
     push    r7
-endm
+.endm
 
-MY_POP_4_REGS macro
+.macro MY_POP_4_REGS
     pop     r7
     pop     r6
     pop     r5
     pop     r3
-endm
+.endm
 
 
-ifdef x64
+.ifdef x64
 
 ; for WIN64-x64 ABI:
 
@@ -127,21 +128,21 @@ REG_PARAM_1 equ r2
 REG_PARAM_2 equ r8
 REG_PARAM_3 equ r9
 
-MY_PUSH_PRESERVED_REGS macro
+.macro MY_PUSH_PRESERVED_REGS
     MY_PUSH_4_REGS
     push    r12
     push    r13
     push    r14
     push    r15
-endm
+.endm
 
 
-MY_POP_PRESERVED_REGS macro
+.macro MY_POP_PRESERVED_REGS
     pop     r15
     pop     r14
     pop     r13
     pop     r12
     MY_POP_4_REGS
-endm
+.endm
 
-endif
+.endif

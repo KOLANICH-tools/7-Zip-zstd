@@ -1,5 +1,6 @@
 ; 7zCrcOpt.asm -- CRC32 calculation : optimized version
 ; 2009-12-12 : Igor Pavlov : Public domain
+.intel_syntax noprefix
 
 include 7zAsm.asm
 
